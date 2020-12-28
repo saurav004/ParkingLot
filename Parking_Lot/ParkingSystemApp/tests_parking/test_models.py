@@ -34,3 +34,13 @@ class CarTest(TestCase):
     def test_car_creation(self):
         obj1 = Car.objects.get(brand='Audi')
         self.assertEquals(obj1.vehicle_model, 'Q7')
+
+
+class SlotTest(TestCase):
+    def setUp(self):
+        car_object = Car.objects.create(brand='Audi', vehicle_model='Q8', colour='aqua')
+        Slot.objects.create(row=1, column=5, parked_car=car_object)
+
+    def test_slot_creation(self):
+        obj1 = Car.objects.get(colour='aqua')
+        self.assertEquals(obj1.vehicle_model, 'Q8')
