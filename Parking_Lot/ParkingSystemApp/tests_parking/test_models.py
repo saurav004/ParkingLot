@@ -70,3 +70,10 @@ class Parking(TestCase):
         parking_lot_object.save()
         is_parked = Car.objects.get(id=car_object.id).is_parked
         self.assertNotEqual(True, is_parked)
+
+    def test_parkinglot_vacant_or_not(self):
+        car_object = Car.objects.create(is_parked=True, brand='Bugatti', vehicle_model='chiron', colour='magenta')
+        slots = Slot.objects.create(row=1, column=5, parked_car=car_object)
+        ParkingArea.objects.create(status="vacant", property_Owner="admin", slots=slots)
+        parking_object = ParkingArea.objects.get(status="vacant", property_Owner="admin", slots=slots)
+        self.assertEquals(parking_object.status, "vacant")
