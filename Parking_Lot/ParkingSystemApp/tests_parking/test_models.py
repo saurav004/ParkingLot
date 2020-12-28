@@ -44,3 +44,29 @@ class SlotTest(TestCase):
     def test_slot_creation(self):
         obj1 = Car.objects.get(colour='aqua')
         self.assertEquals(obj1.vehicle_model, 'Q8')
+
+
+class Parking(TestCase):
+    def test_parked_or_not(self):
+        car_object = Car.objects.create(is_parked=True, brand='Bugatti', vehicle_model='chiron', colour='magenta')
+        slots = Slot.objects.create(row=1, column=5, parked_car=car_object)
+        ParkingArea.objects.create(property_Owner="admin", slots=slots)
+        is_parked = Car.objects.get(id=car_object.id).is_parked
+        self.assertEquals(True, is_parked)
+
+    def test_unparked_or_not(self):
+        car_object = Car.objects.create(is_parked=True, brand='Bugatti', vehicle_model='chiron', colour='magenta')
+        slots = Slot.objects.create(row=1, column=5, parked_car=car_object)
+        ParkingArea.objects.create(property_Owner="admin", slots=slots)
+        car_object = Car.objects.get(is_parked=True, brand='Bugatti', vehicle_model='chiron', colour='magenta')
+        car_object = Car.objects.get(id=car_object.id)
+        car_object.is_parked = False
+        car_object.save()
+        slots = Slot.objects.get(row=1, column=5, parked_car=car_object)
+        slots.parked_car = None
+        slots.save()
+        parking_lot_object = ParkingArea.objects.get(property_Owner="admin", slots=slots)
+        parking_lot_object.slots = None
+        parking_lot_object.save()
+        is_parked = Car.objects.get(id=car_object.id).is_parked
+        self.assertNotEqual(True, is_parked)
