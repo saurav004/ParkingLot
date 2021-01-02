@@ -1,22 +1,32 @@
 from django.test import TestCase
 from ..models import *
-from ..views import *
 import requests
 import json
 
 
-class TestOwnerApi(TestCase):
-    URL = "http://127.0.0.1:8000/api/owner_api/"
-    data = {}
+class Parking(TestCase):
 
-    def test_owner_get_api(self):
-        def get_owner_data(id=None):
-            data = {'id': id}
+    def test_parked_or_not(self):
+        url = "http://127.0.0.1:8000/api/park_api/"
+
+        def park_car():
+            data = {
+                "car_id": 39,
+                "park_id": 25,
+                "slot_id": 426
+            }
             json_data = json.dumps(data)
-            r = requests.get(url=self.URL, data=json_data)
+            r = requests.post(url=url, data=json_data,)
             return r.json()
 
-        data = get_owner_data(1)
-        print(data)
-        self.assertNotEqual(data, {})
+        data = park_car()
+        car_id = 39
+        car_object = Car.objects.get(id=car_id)
+        self.assertEquals(True, car_object.is_parked)
+
+    def test_unparked_or_not(self):
+        car_id = 40
+        car_object = Car.objects.get(id=car_id)
+        self.assertEquals(False, car_object.is_parked)
+
 
