@@ -410,3 +410,13 @@ def unpark_my_car(request):
             return Response(status=HTTP_400_BAD_REQUEST, data={"msg": 'Car not Found'})
     else:
         return Response(status=HTTP_400_BAD_REQUEST, data={"msg": "car id provided is null"})
+
+
+@api_view(['GET'])
+@csrf_exempt
+def get_vehicle_location_info(request):
+    colour = request.data.get('colour_of_car')
+    data = {}
+    for vehicle in Car.objects.filter(colour=colour):
+        data[vehicle.id] = {"colour": vehicle.colour, "park_id": vehicle.park_id, "slot_id": vehicle.slot_id}
+    return Response(status=HTTP_200_OK, data=data)

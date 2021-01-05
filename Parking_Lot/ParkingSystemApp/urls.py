@@ -21,5 +21,6 @@ urlpatterns = [
     path('driver_api/<int:pk>', views.DriverApi.as_view(), name='driver_detail'),
     path('park_api/', views.park_my_car, name='park'),
     path('unpark_api/', views.unpark_my_car, name='unpark'),
+    path('vehicle_location_api/', views.get_vehicle_location_info, name='location_info'),
 
 ]
