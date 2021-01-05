@@ -420,3 +420,18 @@ def get_vehicle_location_info(request):
     for vehicle in Car.objects.filter(colour=colour):
         data[vehicle.id] = {"colour": vehicle.colour, "park_id": vehicle.park_id, "slot_id": vehicle.slot_id}
     return Response(status=HTTP_200_OK, data=data)
+
+
+@api_view(['GET'])
+@csrf_exempt
+def get_location_number_parking_attendant_info(request):
+    vehicle_company = request.data.get('vehicle_company')
+    colour = request.data.get('colour')
+    data = {}
+    for vehicle in Car.objects.filter(vehicle_company=vehicle_company, colour=colour, ):
+        valet_obj = Valet.objects.get(id=vehicle.valet_assigned_id)
+        parking_attendant_name = valet_obj.valet_name
+        data[vehicle.id] = {"no_plate": vehicle.no_plate, "parking_attendant": parking_attendant_name,
+                            "colour": vehicle.colour, "park_id": vehicle.park_id,
+                            "slot_id": vehicle.slot_id}
+    return Response(status=HTTP_200_OK, data=data)

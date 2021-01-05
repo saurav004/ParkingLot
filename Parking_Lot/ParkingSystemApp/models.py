@@ -5,7 +5,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 
 class Car(models.Model):
     entry_time = models.DateTimeField(default=timezone.now)
-    brand = models.CharField(default=None, max_length=100)
+    vehicle_company = models.CharField(default=None, max_length=100)
     vehicle_model = models.CharField(default=None, max_length=100)
     colour = models.CharField(default=None, max_length=100)
     checkout_time = models.DateTimeField(auto_now=True)
