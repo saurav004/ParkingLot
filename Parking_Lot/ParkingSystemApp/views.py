@@ -5,7 +5,6 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_201_CREATED, HTTP_200_OK, HTTP_500_INTERNAL_SERVER_ERROR, \
     HTTP_302_FOUND
 from rest_framework.views import APIView
-from .models import *
 from .serializers import *
 from .tasks import *
 
@@ -267,14 +266,14 @@ class DriverApi(APIView):
         id = pk
         if id is not None:
             object1 = Driver.objects.get(id=id)
-            serializer = DriverApi(object1)
+            serializer = DriverSerializer(object1)
             return Response(serializer.data)
         object1 = Driver.objects.all()
         serializer = DriverApi(object1, many=True)
         return Response(serializer.data)
 
     def post(self, request, pk=None):
-        serializer = DriverApi(data=request.data)
+        serializer = DriverSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response({'msg': 'Data created'})
@@ -282,7 +281,7 @@ class DriverApi(APIView):
 
     def put(self, request, pk=None):
         object1 = Driver.objects.get(pk=pk)
-        serializer = DriverApi(object1, data=request.data, partial=True)
+        serializer = DriverSerializer(object1, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response({'msg': 'Complete Data Uploaded'})
@@ -290,7 +289,7 @@ class DriverApi(APIView):
 
     def patch(self, request, pk=None):
         object1 = Driver.objects.get(pk=pk)
-        serializer = DriverApi(object1, data=request.data, partial=True)
+        serializer = DriverSerializer(object1, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response({'msg': 'Partial Data Uploaded'})
@@ -318,20 +317,30 @@ def car_entry_time(request):
     return Response(status=HTTP_302_FOUND, data={'car_entry_time': car_object.entry_time})
 
 
-@api_view(['POST'])
 @csrf_exempt
+@api_view(['POST'])
 def park_my_car(request):
-    parking_lot_id = request.data.get('park_id')
+    parking_lot_object = ParkingArea.objects.first()
+    for park in ParkingArea.objects.all():
+        if parking_lot_object.filled_parking_slots > park.filled_parking_slots:
+            parking_lot_object = park
+    parking_lot_id = parking_lot_object.id
     parking_lot_object = ParkingArea.objects.get(id=parking_lot_id)
     if parking_lot_object.filled_parking_slots < 100:
-        if parking_lot_object.filled_parking_slots == 99:
-            parking_lot_object.filled_parking_slots = parking_lot_object.filled_parking_slots + 1
+        parking_lot_object.filled_parking_slots = parking_lot_object.filled_parking_slots + 1
+        if parking_lot_object.filled_parking_slots == 100:
             parking_lot_object.status = "FULL"
             notify_owner_car_is_parked.delay(parking_lot_object.id)
             notify_airport_security_car_is_parked.delay(parking_lot_object.id)
-        else:
-            parking_lot_object.filled_parking_slots = parking_lot_object.filled_parking_slots + 1
         parking_lot_object.save()
+        slots = None
+        for slot_obj in parking_lot_object.slots.all():
+            if slot_obj.status == "VACANT" or slot_obj.status is None:
+                slots = slot_obj
+        if slots is None:
+            return Response(status=HTTP_500_INTERNAL_SERVER_ERROR, data={'msg': 'no slot is VACANT'})
+        else:
+            slot_id = slots.id
         parking_attendant = None
         for obj in Valet.objects.all():
             if not obj.is_Currently_Parking:
@@ -346,8 +355,8 @@ def park_my_car(request):
         parking_attendant.vehicle_assigned = car_object
         parking_attendant.is_Currently_Parking = True
         parking_attendant.save()
-        slot_id = request.data.get('slot_id')
-        slots = Slot.objects.get(id=slot_id)
+        # slot_id = request.data.get('slot_id')
+        # slots = Slot.objects.get(id=slot_id)
         slots.parked_car = car_object
         slots.status = "FULL"
         slots.save()
@@ -362,32 +371,35 @@ def park_my_car(request):
 @api_view(['POST'])
 @csrf_exempt
 def unpark_my_car(request):
-    car_id = request.data.get('car_id')
-    car_object = Car.objects.get(id=car_id)
-    if car_object:
-        slot_id = car_object.slot_id
-        slot_object = Slot.objects.get(id=slot_id)
-        slot_object.parked_car = None
-        slot_object.status = "VACANT"
-        slot_object.save()
-        park_id = car_object.park_id
-        park_object = ParkingArea.objects.get(id=park_id)
-        valet_id = car_object.valet_assigned_id
-        valet_object = Valet.objects.get(id=valet_id)
-        valet_object.is_Currently_Parking = False
-        valet_object.vehicle_assigned = None
-        valet_object.save()
-        park_object.filled_parking_slots = park_object.filled_parking_slots - 1
-        if park_object.status == "FULL":
-            park_object.status = "VACANT"
-            notify_owner_car_is_unparked.delay(park_object.id)
-            notify_airport_security_car_is_unparked.delay(park_object.id)
-        park_object.save()
-        car_object.is_parked = False
-        car_object.slot_id = None
-        car_object.park_id = None
-        car_object.valet_assigned_id = None
-        car_object.save()
-        return Response(status=HTTP_200_OK, data={'msg': 'Car Un-parked'})
+    car_id = request.data['car_id']
+    if car_id is not None:
+        car_object = Car.objects.get(id=car_id)
+        if car_object:
+            slot_id = car_object.slot_id
+            slot_object = Slot.objects.get(id=slot_id)
+            slot_object.parked_car = None
+            slot_object.status = "VACANT"
+            slot_object.save()
+            park_id = car_object.park_id
+            park_object = ParkingArea.objects.get(id=park_id)
+            valet_id = car_object.valet_assigned_id
+            valet_object = Valet.objects.get(id=valet_id)
+            valet_object.is_Currently_Parking = False
+            valet_object.vehicle_assigned = None
+            valet_object.save()
+            park_object.filled_parking_slots = park_object.filled_parking_slots - 1
+            if park_object.status == "FULL":
+                park_object.status = "VACANT"
+                notify_owner_car_is_unparked.delay(park_object.id)
+                notify_airport_security_car_is_unparked.delay(park_object.id)
+            park_object.save()
+            car_object.is_parked = False
+            car_object.slot_id = None
+            car_object.park_id = None
+            car_object.valet_assigned_id = None
+            car_object.save()
+            return Response(status=HTTP_200_OK, data={'msg': 'Car Un-parked'})
+        else:
+            return Response(status=HTTP_400_BAD_REQUEST, data={"msg": 'Car not Found'})
     else:
-        return Response(status=HTTP_400_BAD_REQUEST, data={'msg': 'Car not Found'})
+        return Response(status=HTTP_400_BAD_REQUEST, data={"msg": "car id provided is null"})

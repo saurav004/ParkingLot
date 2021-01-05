@@ -20,6 +20,6 @@ urlpatterns = [
     path('find_my_car_api/', views.find_my_car_api, name='find_car'),
     path('driver_api/<int:pk>', views.DriverApi.as_view(), name='driver_detail'),
     path('park_api/', views.park_my_car, name='park'),
-    path('unpark_api', views.unpark_my_car, name='unpark'),
+    path('unpark_api/', views.unpark_my_car, name='unpark'),
 
 ]
