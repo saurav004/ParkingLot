@@ -11,7 +11,7 @@ class OwnerSerializer(serializers.ModelSerializer):
 class VehicleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Car
-        fields = ['id', 'entry_time', 'brand', 'vehicle_model', 'colour', 'is_parked', 'checkout_time', 'time', 'paid',
+        fields = ['id', 'entry_time', 'vehicle_company', 'vehicle_model', 'colour', 'is_parked', 'checkout_time', 'time', 'paid',
                   'left',
                   'no_plate', 'park_id', 'slot_id', 'valet_assigned_id']
 

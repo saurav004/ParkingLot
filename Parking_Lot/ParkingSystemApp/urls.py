@@ -23,5 +23,6 @@ urlpatterns = [
     path('vehicle_location_api/', views.get_vehicle_location_info, name='location_info'),
     path('vehicle_info_for_investigation/', views.get_location_number_parking_attendant_info,
          name='vehicle_investigation'),
+    path('vehicle_info/', views.get_vehicle_details, name='vehicle_info'),
 
 ]

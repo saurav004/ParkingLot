@@ -435,3 +435,16 @@ def get_location_number_parking_attendant_info(request):
                             "colour": vehicle.colour, "park_id": vehicle.park_id,
                             "slot_id": vehicle.slot_id}
     return Response(status=HTTP_200_OK, data=data)
+
+
+@api_view(['GET'])
+@csrf_exempt
+def get_vehicle_details(request):
+    vehicle_company = request.data.get('vehicle_company')
+    data = {}
+    count = 0
+    for vehicle in Car.objects.filter(vehicle_company=vehicle_company):
+        serializer = VehicleSerializer(vehicle)
+        count = count + 1
+        data[count] = serializer.data
+    return Response(status=HTTP_200_OK, data=data)

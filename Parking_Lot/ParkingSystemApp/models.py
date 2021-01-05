@@ -19,7 +19,7 @@ class Car(models.Model):
     valet_assigned_id = models.IntegerField(validators=[MinValueValidator(1)], null=True, blank=True)
 
     def __str__(self):
-        return f"{self.colour} - {self.brand} - {self.vehicle_model} - {self.no_plate} - is parked: {self.is_parked} - " \
+        return f"{self.colour} - {self.vehicle_company} - {self.vehicle_model} - {self.no_plate} - is parked: {self.is_parked} - " \
                f"id: {self.id}"
 
 
