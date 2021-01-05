@@ -46,7 +46,7 @@ class ParkingArea(models.Model):
     filled_parking_slots = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(100)], default=1,
                                                blank=True)
     property_Owner = models.CharField(max_length=30, default="admin")
-    slots = models.ManyToManyField(Slot, blank=True, default=None)
+    slots = models.ManyToManyField(Slot, blank=True, default="VACANT")
 
     def __str__(self):
         return f"id: {self.id} and unique id : {self.unique_park_id}"
@@ -86,6 +86,7 @@ class Valet(models.Model):
 class Driver(models.Model):
     Driver_name = models.CharField(max_length=100)
     vehicle = models.ForeignKey(Car, on_delete=models.CASCADE, blank=True, null=True)
+    is_handicapped = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.Driver_name} - status {self.vehicle}"

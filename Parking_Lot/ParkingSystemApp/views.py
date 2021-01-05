@@ -269,7 +269,7 @@ class DriverApi(APIView):
             serializer = DriverSerializer(object1)
             return Response(serializer.data)
         object1 = Driver.objects.all()
-        serializer = DriverApi(object1, many=True)
+        serializer = DriverSerializer(object1, many=True)
         return Response(serializer.data)
 
     def post(self, request, pk=None):
@@ -320,8 +320,13 @@ def car_entry_time(request):
 @csrf_exempt
 @api_view(['POST'])
 def park_my_car(request):
+    driver_object = Driver.objects.get(id=request.data.get('driver_id'))
     parking_lot_object = ParkingArea.objects.first()
-    for park in ParkingArea.objects.all():
+    if driver_object.is_handicapped:
+        parking_objects_list = ParkingArea.objects.all().order_by('id')
+    else:
+        parking_objects_list = ParkingArea.objects.all()
+    for park in parking_objects_list:
         if parking_lot_object.filled_parking_slots > park.filled_parking_slots:
             parking_lot_object = park
     parking_lot_id = parking_lot_object.id
@@ -334,7 +339,11 @@ def park_my_car(request):
             notify_airport_security_car_is_parked.delay(parking_lot_object.id)
         parking_lot_object.save()
         slots = None
-        for slot_obj in parking_lot_object.slots.all():
+        if driver_object.is_handicapped:
+            slot_obj_list = parking_lot_object.slots.all().order_by('-id')
+        else:
+            slot_obj_list = parking_lot_object.slots.all()
+        for slot_obj in slot_obj_list:
             if slot_obj.status == "VACANT" or slot_obj.status is None:
                 slots = slot_obj
         if slots is None:
@@ -355,8 +364,6 @@ def park_my_car(request):
         parking_attendant.vehicle_assigned = car_object
         parking_attendant.is_Currently_Parking = True
         parking_attendant.save()
-        # slot_id = request.data.get('slot_id')
-        # slots = Slot.objects.get(id=slot_id)
         slots.parked_car = car_object
         slots.status = "FULL"
         slots.save()
