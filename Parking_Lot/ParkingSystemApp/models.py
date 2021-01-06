@@ -24,25 +24,25 @@ class Car(models.Model):
 
 
 class Slot(models.Model):
-    MY_CHOICES = (
+    STATUS_OPTIONS = (
         ('FULL', 'FULL'),
         ('VACANT', 'VACANT'),
     )
     parked_car = models.ForeignKey(Car, on_delete=models.CASCADE, blank=True, null=True)
     slot_number = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(100)])
-    status = models.CharField(max_length=30, choices=MY_CHOICES, null=True, blank=True)
+    status = models.CharField(max_length=30, choices=STATUS_OPTIONS, null=True, blank=True)
 
     def __str__(self):
         return f"slot id: {self.id} number: [{self.slot_number} - status: {self.status}]"
 
 
 class ParkingArea(models.Model):
-    MY_CHOICES = (
+    STATUS_OPTIONS = (
         ('FULL', 'FULL'),
         ('VACANT', 'VACANT'),
     )
     unique_park_id = models.IntegerField(unique=True, validators=[MinValueValidator(1)])
-    status = models.CharField(max_length=30, default="VACANT", choices=MY_CHOICES, )
+    status = models.CharField(max_length=30, default="VACANT", choices=STATUS_OPTIONS, )
     filled_parking_slots = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(100)], default=1,
                                                blank=True)
     property_Owner = models.CharField(max_length=30, default="admin")
@@ -62,12 +62,12 @@ class Owner(models.Model):
 
 
 class PoliceOrSecurity(models.Model):
-    MY_CHOICES = (
+    WORKS_AT_OPTIONS = (
         ('AIRPORT', 'AIRPORT'),
         ('POLICE', 'POLICE'),
     )
     officer_name = models.CharField(max_length=100)
-    works_at = models.CharField(max_length=100, choices=MY_CHOICES)
+    works_at = models.CharField(max_length=100, choices=WORKS_AT_OPTIONS)
     full_parking_lots = models.ManyToManyField(ParkingArea, blank=True, related_name="fullParkDetails", default=None)
 
     def __str__(self):

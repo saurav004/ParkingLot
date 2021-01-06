@@ -7,6 +7,7 @@ from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_201_CREATED, HTTP_2
 from rest_framework.views import APIView
 from .serializers import *
 from .tasks import *
+from datetime import datetime, timedelta
 
 
 def home(request):
@@ -14,41 +15,44 @@ def home(request):
 
 
 class OwnerApi(APIView):
-    def get(self, request, pk=None):
-        id = pk
+    def get(self, request):
+        id = request.data.get('id')
         if id is not None:
             owner_object = Owner.objects.get(id=id)
             serializer = OwnerSerializer(owner_object)
-            return Response(serializer.data)
+            return Response(status=HTTP_200_OK, data=serializer.data)
         owner_object = Owner.objects.all()
         serializer = OwnerSerializer(owner_object, many=True)
-        return Response(serializer.data)
+        return Response(status=HTTP_200_OK, data=serializer.data)
 
     def post(self, request, pk=None):
         serializer = OwnerSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response({'msg': 'Data created'})
-        return Response({'msg': serializer.errors})
+        return Response(status=HTTP_200_OK, data=serializer.errors)
 
-    def put(self, request, pk=None):
-        owner_object = Owner.objects.get(pk=pk)
+    def put(self, request):
+        id = request.data.get('id')
+        owner_object = Owner.objects.get(id=id)
         serializer = OwnerSerializer(owner_object, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            return Response({'msg': 'Complete Data Uploaded'})
+            return Response(status=HTTP_200_OK, data={'msg': 'Complete Data Uploaded'})
         return Response(serializer.errors)
 
-    def patch(self, request, pk=None):
-        owner_object = Owner.objects.get(pk=pk)
+    def patch(self, request):
+        id = request.data.get('id')
+        owner_object = Owner.objects.get(id=id)
         serializer = OwnerSerializer(owner_object, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response({'msg': 'Partial Data Uploaded'})
         return Response(serializer.errors)
 
-    def delete(self, request, pk=None):
-        owner_object = Owner.objects.get(pk=pk)
+    def delete(self, request):
+        id = request.data.get('id')
+        owner_object = Owner.objects.get(id=id)
         owner_object.delete()
         return Response({'msg': 'Data Deleted'})
 
@@ -79,8 +83,9 @@ class ParkingApi(APIView):
             return Response({'msg': 'Data created'})
         return Response({'msg': serializer.errors})
 
-    def put(self, request, pk=None):
-        object1 = ParkingArea.objects.get(pk=pk)
+    def put(self, request):
+        id = request.data.get('id')
+        object1 = ParkingArea.objects.get(id=id)
         serializer = ParkingLotSerializer(object1, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
@@ -88,22 +93,24 @@ class ParkingApi(APIView):
         return Response(serializer.errors)
 
     def patch(self, request, pk=None):
-        object1 = ParkingArea.objects.get(pk=pk)
+        id = request.data.get('id')
+        object1 = ParkingArea.objects.get(id=id)
         serializer = ParkingLotSerializer(object1, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response({'msg': 'Partial Data Uploaded'})
         return Response(serializer.errors)
 
-    def delete(self, request, pk=None):
-        object1 = ParkingArea.objects.get(pk=pk)
+    def delete(self, request):
+        id = request.data.get('id')
+        object1 = ParkingArea.objects.get(id=id)
         object1.delete()
         return Response({'msg': 'Data Deleted'})
 
 
 class VehicleApi(APIView):
-    def get(self, request, pk=None):
-        id = pk
+    def get(self, request):
+        id = request.data.get('id')
         if id is not None:
             object1 = Car.objects.get(id=id)
             serializer = VehicleSerializer(object1)
@@ -112,38 +119,41 @@ class VehicleApi(APIView):
         serializer = VehicleSerializer(object1, many=True)
         return Response(serializer.data)
 
-    def post(self, request, pk=None):
+    def post(self, request):
         serializer = VehicleSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response({'msg': 'Data created'})
         return Response({'msg': serializer.errors})
 
-    def put(self, request, pk=None):
-        object1 = Car.objects.get(pk=pk)
+    def put(self, request):
+        id = request.data.get('id')
+        object1 = Car.objects.get(id=id)
         serializer = VehicleSerializer(object1, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response({'msg': 'Complete Data Uploaded'})
         return Response(serializer.errors)
 
-    def patch(self, request, pk=None):
-        object1 = Car.objects.get(pk=pk)
+    def patch(self, request):
+        id = request.data.get('id')
+        object1 = Car.objects.get(id=id)
         serializer = VehicleSerializer(object1, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response({'msg': 'Partial Data Uploaded'})
         return Response(serializer.errors)
 
-    def delete(self, request, pk=None):
-        object1 = Car.objects.get(pk=pk)
+    def delete(self, request):
+        id = request.data.get('id')
+        object1 = Car.objects.get(id=id)
         object1.delete()
         return Response({'msg': 'Data Deleted'})
 
 
 class SlotApi(APIView):
-    def get(self, request, pk=None):
-        id = pk
+    def get(self, request):
+        id = request.data.get('id')
         if id is not None:
             object1 = Slot.objects.get(id=id)
             serializer = SlotSerializer(object1)
@@ -152,38 +162,41 @@ class SlotApi(APIView):
         serializer = SlotSerializer(object1, many=True)
         return Response(serializer.data)
 
-    def post(self, request, pk=None):
+    def post(self, request):
         serializer = SlotSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response({'msg': 'Data created'})
         return Response({'msg': serializer.errors})
 
-    def put(self, request, pk=None):
-        object1 = Slot.objects.get(pk=pk)
+    def put(self, request):
+        id = request.data.get('id')
+        object1 = Slot.objects.get(id=id)
         serializer = SlotSerializer(object1, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response({'msg': 'Complete Data Uploaded'})
         return Response(serializer.errors)
 
-    def patch(self, request, pk=None):
-        object1 = Slot.objects.get(pk=pk)
+    def patch(self, request):
+        id = request.data.get('id')
+        object1 = Slot.objects.get(id=id)
         serializer = SlotSerializer(object1, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response({'msg': 'Partial Data Uploaded'})
         return Response(serializer.errors)
 
-    def delete(self, request, pk=None):
-        object1 = Slot.objects.get(pk=pk)
+    def delete(self, request):
+        id = request.data.get('id')
+        object1 = Slot.objects.get(id=id)
         object1.delete()
         return Response({'msg': 'Data Deleted'})
 
 
 class PoliceOrSecurityApi(APIView):
-    def get(self, request, pk=None):
-        id = pk
+    def get(self, request):
+        id = request.data.get('id')
         if id is not None:
             object1 = PoliceOrSecurity.objects.get(id=id)
             serializer = PoliceOrSecuritySerializer(object1)
@@ -192,15 +205,16 @@ class PoliceOrSecurityApi(APIView):
         serializer = PoliceOrSecuritySerializer(object1, many=True)
         return Response(serializer.data)
 
-    def post(self, request, pk=None):
+    def post(self, request):
         serializer = PoliceOrSecuritySerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response({'msg': 'Data created'})
         return Response({'msg': serializer.errors})
 
-    def put(self, request, pk=None):
-        object1 = PoliceOrSecurity.objects.get(pk=pk)
+    def put(self, request):
+        id = request.data.get('id')
+        object1 = PoliceOrSecurity.objects.get(id=id)
         serializer = PoliceOrSecuritySerializer(object1, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
@@ -208,7 +222,8 @@ class PoliceOrSecurityApi(APIView):
         return Response(serializer.errors)
 
     def patch(self, request, pk=None):
-        object1 = PoliceOrSecurity.objects.get(pk=pk)
+        id = request.data.get('id')
+        object1 = PoliceOrSecurity.objects.get(id=id)
         serializer = PoliceOrSecuritySerializer(object1, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
@@ -216,14 +231,15 @@ class PoliceOrSecurityApi(APIView):
         return Response(serializer.errors)
 
     def delete(self, request, pk=None):
-        object1 = PoliceOrSecurity.objects.get(pk=pk)
+        id = request.data.get('id')
+        object1 = PoliceOrSecurity.objects.get(id=id)
         object1.delete()
         return Response({'msg': 'Data Deleted'})
 
 
 class ValetApi(APIView):
-    def get(self, request, pk=None):
-        id = pk
+    def get(self, request):
+        id = request.data.get('id')
         if id is not None:
             object1 = Valet.objects.get(id=id)
             serializer = ValetSerializer(object1)
@@ -232,7 +248,7 @@ class ValetApi(APIView):
         serializer = ValetSerializer(object1, many=True)
         return Response(serializer.data)
 
-    def post(self, request, pk=None):
+    def post(self, request):
         serializer = ValetSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -240,30 +256,33 @@ class ValetApi(APIView):
         return Response({'msg': serializer.errors})
 
     def put(self, request, pk=None):
-        object1 = Valet.objects.get(pk=pk)
+        id = request.data.get('id')
+        object1 = Valet.objects.get(id=id)
         serializer = ValetSerializer(object1, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response({'msg': 'Complete Data Uploaded'})
         return Response(serializer.errors)
 
-    def patch(self, request, pk=None):
-        object1 = Valet.objects.get(pk=pk)
+    def patch(self, request):
+        id = request.data.get('id')
+        object1 = Valet.objects.get(id=id)
         serializer = ValetSerializer(object1, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response({'msg': 'Partial Data Uploaded'})
         return Response(serializer.errors)
 
-    def delete(self, request, pk=None):
-        object1 = Valet.objects.get(pk=pk)
+    def delete(self, request):
+        id = request.data.get('id')
+        object1 = Valet.objects.get(id=id)
         object1.delete()
         return Response({'msg': 'Data Deleted'})
 
 
 class DriverApi(APIView):
-    def get(self, request, pk=None):
-        id = pk
+    def get(self, request):
+        id = request.data.get('id')
         if id is not None:
             object1 = Driver.objects.get(id=id)
             serializer = DriverSerializer(object1)
@@ -272,31 +291,34 @@ class DriverApi(APIView):
         serializer = DriverSerializer(object1, many=True)
         return Response(serializer.data)
 
-    def post(self, request, pk=None):
+    def post(self, request):
         serializer = DriverSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response({'msg': 'Data created'})
         return Response({'msg': serializer.errors})
 
-    def put(self, request, pk=None):
-        object1 = Driver.objects.get(pk=pk)
+    def put(self, request):
+        id = request.data.get('id')
+        object1 = Driver.objects.get(id=id)
         serializer = DriverSerializer(object1, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response({'msg': 'Complete Data Uploaded'})
         return Response(serializer.errors)
 
-    def patch(self, request, pk=None):
-        object1 = Driver.objects.get(pk=pk)
+    def patch(self, request):
+        id = request.data.get('id')
+        object1 = Driver.objects.get(id=id)
         serializer = DriverSerializer(object1, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response({'msg': 'Partial Data Uploaded'})
         return Response(serializer.errors)
 
-    def delete(self, request, pk=None):
-        object1 = Driver.objects.get(pk=pk)
+    def delete(self, request):
+        id = request.data.get('id')
+        object1 = Driver.objects.get(id=id)
         object1.delete()
         return Response({'msg': 'Data Deleted'})
 
@@ -447,4 +469,13 @@ def get_vehicle_details(request):
         serializer = VehicleSerializer(vehicle)
         count = count + 1
         data[count] = serializer.data
+    return Response(status=HTTP_200_OK, data=data)
+
+
+@api_view(['GET'])
+@csrf_exempt
+def get_vehicle_info_parked_before_time_given(request):
+    time_ago = request.data.get('time_ago')
+    time_ago = datetime.now() - timedelta(minutes=time_ago)
+    data = Car.objects.filter(entry_time=time_ago)
     return Response(status=HTTP_200_OK, data=data)
