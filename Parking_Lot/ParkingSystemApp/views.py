@@ -8,6 +8,7 @@ from rest_framework.views import APIView
 from .serializers import *
 from .tasks import *
 from datetime import datetime, timedelta
+from django.utils import timezone
 
 
 def home(request):
@@ -476,6 +477,7 @@ def get_vehicle_details(request):
 @csrf_exempt
 def get_vehicle_info_parked_before_time_given(request):
     time_ago = request.data.get('time_ago')
-    time_ago = datetime.now() - timedelta(minutes=time_ago)
-    data = Car.objects.filter(entry_time=time_ago)
-    return Response(status=HTTP_200_OK, data=data)
+    time_ago = timezone.now() - timezone.timedelta(minutes=time_ago)
+    data = Car.objects.filter(entry_time__gt=time_ago)
+    serializer = VehicleSerializer(data, many=True)
+    return Response(status=HTTP_200_OK, data=serializer.data)
