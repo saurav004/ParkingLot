@@ -2,8 +2,7 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_201_CREATED, HTTP_200_OK, HTTP_500_INTERNAL_SERVER_ERROR, \
-    HTTP_302_FOUND
+from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_201_CREATED, HTTP_200_OK, HTTP_500_INTERNAL_SERVER_ERROR
 from rest_framework.views import APIView
 from .serializers import *
 from .tasks import *
@@ -329,7 +328,7 @@ class DriverApi(APIView):
 def find_my_car_api(request):
     car_id = request.data.get('car_id')
     car_object = Car.objects.get(id=car_id)
-    return Response(status=HTTP_302_FOUND, data={'park': car_object.park_id, 'slot': car_object.slot_id})
+    return Response(status=HTTP_200_OK, data={'park': car_object.park_id, 'slot': car_object.slot_id})
 
 
 @api_view(['GET'])
@@ -337,7 +336,7 @@ def find_my_car_api(request):
 def car_entry_time(request):
     car_id = request.data.get('car_id')
     car_object = Car.objects.get(id=car_id)
-    return Response(status=HTTP_302_FOUND, data={'car_entry_time': car_object.entry_time})
+    return Response(status=HTTP_200_OK, data={'car_entry_time': car_object.entry_time})
 
 
 @csrf_exempt

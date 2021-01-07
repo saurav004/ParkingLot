@@ -505,3 +505,79 @@ class DriverTest(TestCase):
             content_type='application/json'
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+
+class DetailQueryAPIs(TestCase):
+
+    def setUp(self):
+        self.park = ParkingArea.objects.create(unique_park_id=12, status="VACANT", property_Owner="Kumar Saurav")
+        self.vehicle = Car.objects.create(id=20, vehicle_company='Maruti', vehicle_model='800', colour='blue',
+                                          no_plate="VK 34 CD 6413")
+        self.car_data = {
+            "car_id": self.vehicle.id
+        }
+        self.park_data = {
+            "park_id": self.park.id
+        }
+        self.minutes_back_in_time = {
+            "time_ago": "30"
+        }
+        self.vehicle_company = {
+            "vehicle_company": "Maruti"
+        }
+        self.vehicle_company_and_colour = {
+            "vehicle_company": "Maruti",
+            "colour": "blue"
+        }
+        self.colour_of_vehicle = {
+            "colour": "blue"
+        }
+
+    def test_find_my_car_api(self):
+        response = client.get(
+            reverse('find_car'),
+            data=self.car_data
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_car_entry_time_api(self):
+        response = client.get(
+            reverse('entry_time'),
+            data=self.car_data
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_all_vehicle_info_in_the_lot(self):
+        response = client.get(
+            reverse('all_vehicle_info_in_the_lot'),
+            data=self.park_data
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_vehicle_info_back_in_time(self):
+        response = client.get(
+            reverse('vehicle_info_back_in_time'),
+            data=self.minutes_back_in_time
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_vehicle_details(self):
+        response = client.get(
+            reverse('vehicle_info'),
+            data=self.vehicle_company
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_location_number_parking_attendant_info_Api(self):
+        response = client.get(
+            reverse('vehicle_investigation'),
+            data=self.vehicle_company
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_location_info(self):
+        response = client.get(
+            reverse('location_info'),
+            data=self.colour_of_vehicle
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)

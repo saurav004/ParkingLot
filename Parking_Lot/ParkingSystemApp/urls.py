@@ -11,6 +11,7 @@ urlpatterns = [
     path('slot_api/', views.SlotApi.as_view(), name='slot_list'),
     path('driver_api/', views.DriverApi.as_view(), name='driver_list'),
     path('find_my_car_api/', views.find_my_car_api, name='find_car'),
+    path('car_entry_time/', views.car_entry_time, name='entry_time'),
     path('park_api/', views.park_my_car, name='park'),
     path('unpark_api/', views.unpark_my_car, name='unpark'),
     path('vehicle_location_api/', views.get_vehicle_location_info, name='location_info'),
