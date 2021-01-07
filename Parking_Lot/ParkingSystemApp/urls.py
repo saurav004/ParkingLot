@@ -19,5 +19,6 @@ urlpatterns = [
     path('vehicle_info/', views.get_vehicle_details, name='vehicle_info'),
     path('vehicle_info_parked_earlier/', views.get_vehicle_info_parked_before_time_given,
          name='vehicle_info_back_in_time'),
-
+    path('all_vehicle_info_in_the_lot/', views.get_info_of_all_vehicles_parked_in_the_lot,
+         name='all_vehicle_info_in_the_lot'),
 ]

@@ -481,3 +481,12 @@ def get_vehicle_info_parked_before_time_given(request):
     data = Car.objects.filter(entry_time__gt=time_ago)
     serializer = VehicleSerializer(data, many=True)
     return Response(status=HTTP_200_OK, data=serializer.data)
+
+
+@api_view(['GET'])
+@csrf_exempt
+def get_info_of_all_vehicles_parked_in_the_lot(request):
+    park_id = request.data.get('park_id')
+    data = Car.objects.filter(park_id=park_id)
+    serializer = VehicleSerializer(data, many=True)
+    return Response(status=HTTP_200_OK, data=serializer.data)
