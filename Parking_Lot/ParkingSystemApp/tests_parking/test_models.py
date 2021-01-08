@@ -7,7 +7,7 @@ class OwnerAndPropertyTest(TestCase):
         Owner.objects.create(Owner_name='cat')
         car_object = Car.objects.create(vehicle_company='Audi', vehicle_model='Q7', colour='black',
                                         no_plate='AB 12 CD 1234')
-        slots = Slot.objects.create(slot_number=0, parked_car=car_object)
+        slots = Slot.objects.create(slot_number=0, parked_car=car_object, row=1, column=1)
         ParkingArea.objects.create(unique_park_id=9, status="VACANT", property_Owner="Kumar Saurav")
 
     def test_OwnerModel_WhenOwnerCreated_NameShouldBeEqualToGivenName(self):
@@ -53,8 +53,8 @@ class CarTest(TestCase):
 class SlotTest(TestCase):
     def setUp(self):
         car_object = Car.objects.create(vehicle_company='Audi', vehicle_model='Q8', colour='aqua')
-        Slot.objects.create(slot_number=0, parked_car=car_object)
+        Slot.objects.create(slot_number=0, parked_car=car_object, row=1, column=2)
 
     def test_slot_creation(self):
-        obj1 = Slot.objects.get(slot_number=0)
+        obj1 = Slot.objects.get(slot_number=0, row=1, column=2)
         self.assertEquals(obj1.parked_car.vehicle_model, 'Q8')

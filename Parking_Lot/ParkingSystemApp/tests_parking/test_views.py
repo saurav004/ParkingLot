@@ -15,12 +15,12 @@ class Parking(TestCase):
                                       no_plate="AB 12 CD 1234")
         self.park = ParkingArea.objects.create(unique_park_id=10, status="VACANT", property_Owner="Kumar Saurav")
         for i in range(1, 101):
-            slot = Slot.objects.create(slot_number=i)
+            slot = Slot.objects.create(slot_number=i, row=1, column=3)
             self.park.status = "VACANT"
             self.park.slots.add(slot)
         self.driver = Driver.objects.create(Driver_name="something", vehicle=self.car)
         self.valet = Valet.objects.create(valet_name="koi bhi")
-        self.car2 = Car.objects.create(vehicle_company='BMW', vehicle_model='Advanced', colour='black',
+        self.car2 = Car.objects.create(vehicle_company='BMW', vehicle_model='Advanced', colour='black', is_parked=True,
                                        park_id=self.park.id, slot_id=self.park.slots.all()[0].id,
                                        no_plate="AB 12 CD 1237", valet_assigned_id=self.valet.id)
         self.park_data = {
@@ -248,7 +248,7 @@ class SlotTest(TestCase):
     def setUp(self):
         self.car = Car.objects.create(vehicle_company='BMW', vehicle_model='Advanced', colour='black',
                                       no_plate="ZX 67 CD 1234")
-        self.slots = Slot.objects.create(slot_number=0, parked_car=self.car)
+        self.slots = Slot.objects.create(slot_number=0, parked_car=self.car, row=1, column=4)
         self.get_data = {
             "id": 1
         }
@@ -511,6 +511,7 @@ class DetailQueryAPIs(TestCase):
 
     def setUp(self):
         self.park = ParkingArea.objects.create(unique_park_id=12, status="VACANT", property_Owner="Kumar Saurav")
+        self.park.save()
         self.vehicle = Car.objects.create(id=20, vehicle_company='Maruti', vehicle_model='800', colour='blue',
                                           no_plate="VK 34 CD 6413")
         self.car_data = {
@@ -520,7 +521,7 @@ class DetailQueryAPIs(TestCase):
             "park_id": self.park.id
         }
         self.minutes_back_in_time = {
-            "time_ago": "30"
+            "time_ago": 30
         }
         self.vehicle_company = {
             "vehicle_company": "Maruti"
@@ -531,6 +532,10 @@ class DetailQueryAPIs(TestCase):
         }
         self.colour_of_vehicle = {
             "colour": "blue"
+        }
+        self.park_id_and_row_number = {
+            "park_id": self.park.id,
+            "row": "A"
         }
 
     def test_find_my_car_api(self):
@@ -579,5 +584,12 @@ class DetailQueryAPIs(TestCase):
         response = client.get(
             reverse('location_info'),
             data=self.colour_of_vehicle
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_get_location_and_info_of_vehicles_in_row(self):
+        response = client.get(
+            reverse('all_vehicle_info_park_in_a_row'),
+            data=self.park_id_and_row_number
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)

@@ -223,7 +223,7 @@ class PoliceOrSecurityApi(APIView):
             return Response({'msg': 'Complete Data Uploaded'})
         return Response(serializer.errors)
 
-    def patch(self, request, pk=None):
+    def patch(self, request):
         id = request.data.get('id')
         object1 = PoliceOrSecurity.objects.get(id=id)
         serializer = PoliceOrSecuritySerializer(object1, data=request.data, partial=True)
@@ -236,7 +236,7 @@ class PoliceOrSecurityApi(APIView):
         id = request.data.get('id')
         object1 = PoliceOrSecurity.objects.get(id=id)
         object1.delete()
-        return Response({'msg': 'Data Deleted'})
+        return Response(status=HTTP_200_OK, data={'msg': 'Data Deleted'})
 
 
 class ValetApi(APIView):
@@ -510,7 +510,7 @@ def get_info_of_all_vehicles_parked_in_the_lot(request):
 @api_view(['GET'])
 @csrf_exempt
 def get_location_and_info_of_vehicles_in_row(request):
-    row_and_column_mapping_with_letters = {'A': 1, 'B': 2, 'C': 3, 'D': 4, 'E': '5', 'F': 6, 'G': 7, 'H': '8', 'I': 9,
+    row_and_column_mapping_with_letters = {'A': 1, 'B': 2, 'C': 3, 'D': 4, 'E': 5, 'F': 6, 'G': 7, 'H': 8, 'I': 9,
                                            'J': 10}
     row = request.data.get('row')
     park_id = request.data.get('park_id')
