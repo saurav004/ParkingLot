@@ -25,7 +25,7 @@ class ParkingLotSerializer(serializers.ModelSerializer):
 class SlotSerializer(serializers.ModelSerializer):
     class Meta:
         model = Slot
-        fields = ['id', 'parked_car', 'slot_number', 'status']
+        fields = ['id', 'parked_car', 'slot_number', 'status', 'row', 'column']
 
 
 class PoliceOrSecuritySerializer(serializers.ModelSerializer):

@@ -28,12 +28,14 @@ class Slot(models.Model):
         ('FULL', 'FULL'),
         ('VACANT', 'VACANT'),
     )
+    row = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)])
+    column = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)])
     parked_car = models.ForeignKey(Car, on_delete=models.CASCADE, blank=True, null=True)
     slot_number = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(100)])
     status = models.CharField(max_length=30, choices=STATUS_OPTIONS, null=True, blank=True)
 
     def __str__(self):
-        return f"slot id: {self.id} number: [{self.slot_number} - status: {self.status}]"
+        return f"slot id: {self.id} number: [{self.slot_number} position [{self.row}{self.column}] - status: {self.status}]"
 
 
 class ParkingArea(models.Model):
@@ -89,4 +91,4 @@ class Driver(models.Model):
     is_handicapped = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"{self.Driver_name} - status {self.vehicle}"
+        return f"{self.Driver_name} - status {self.vehicle} id: {self.id}"

@@ -6,7 +6,6 @@ from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_201_CREATED, HTTP_2
 from rest_framework.views import APIView
 from .serializers import *
 from .tasks import *
-from datetime import datetime, timedelta
 from django.utils import timezone
 
 
@@ -25,7 +24,7 @@ class OwnerApi(APIView):
         serializer = OwnerSerializer(owner_object, many=True)
         return Response(status=HTTP_200_OK, data=serializer.data)
 
-    def post(self, request, pk=None):
+    def post(self, request):
         serializer = OwnerSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -68,18 +67,21 @@ class ParkingApi(APIView):
         serializer = ParkingLotSerializer(object1, many=True)
         return Response(serializer.data)
 
-    def post(self, request, pk=None):
+    def post(self, request):
         serializer = ParkingLotSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             park_id = request.data.get('unique_park_id')
             parking_object = ParkingArea.objects.get(unique_park_id=park_id)
-            for i in range(1, 101):
-                slot = Slot.objects.create(slot_number=i)
-                slot.save()
-                parking_object.status = "VACANT"
-                parking_object.slots.add(slot)
-                parking_object.save()
+            count = 0
+            for i in range(1, 11):
+                for j in range(1, 11):
+                    count = count + 1
+                    slot = Slot.objects.create(slot_number=count, row=i, column=j)
+                    slot.save()
+            parking_object.status = "VACANT"
+            parking_object.slots.add(slot)
+            parking_object.save()
             return Response({'msg': 'Data created'})
         return Response({'msg': serializer.errors})
 
@@ -363,11 +365,23 @@ def park_my_car(request):
         slots = None
         if driver_object.is_handicapped:
             slot_obj_list = parking_lot_object.slots.all().order_by('-id')
+            should_break = False
+            for i in range(1, 11):
+                for j in range(1, 11):
+                    for slot_obj in slot_obj_list:
+                        if slot_obj.row == i and slot_obj.column == j:
+                            if slot_obj.status == "VACANT" or slot_obj.status is None:
+                                slots = slot_obj
+                                should_break = True
+                    if should_break:
+                        break
+                if should_break:
+                    break
         else:
             slot_obj_list = parking_lot_object.slots.all()
-        for slot_obj in slot_obj_list:
-            if slot_obj.status == "VACANT" or slot_obj.status is None:
-                slots = slot_obj
+            for slot_obj in slot_obj_list:
+                if slot_obj.status == "VACANT" or slot_obj.status is None:
+                    slots = slot_obj
         if slots is None:
             return Response(status=HTTP_500_INTERNAL_SERVER_ERROR, data={'msg': 'no slot is VACANT'})
         else:
@@ -392,7 +406,8 @@ def park_my_car(request):
         car_object.slot_id = slot_id
         car_object.park_id = parking_lot_id
         car_object.save()
-        return Response(status=HTTP_201_CREATED, data={'msg': 'parked'})
+        serializer = VehicleSerializer(car_object)
+        return Response(status=HTTP_201_CREATED, data=serializer.data)
     else:
         return Response(status=HTTP_400_BAD_REQUEST, data={'msg': 'park full'})
 
@@ -427,7 +442,8 @@ def unpark_my_car(request):
             car_object.park_id = None
             car_object.valet_assigned_id = None
             car_object.save()
-            return Response(status=HTTP_200_OK, data={'msg': 'Car Un-parked'})
+            serializer = VehicleSerializer(car_object)
+            return Response(status=HTTP_200_OK, data=serializer.data)
         else:
             return Response(status=HTTP_400_BAD_REQUEST, data={"msg": 'Car not Found'})
     else:
@@ -489,3 +505,27 @@ def get_info_of_all_vehicles_parked_in_the_lot(request):
     data = Car.objects.filter(park_id=park_id)
     serializer = VehicleSerializer(data, many=True)
     return Response(status=HTTP_200_OK, data=serializer.data)
+
+
+@api_view(['GET'])
+@csrf_exempt
+def get_location_and_info_of_vehicles_in_row(request):
+    row_and_column_mapping_with_letters = {'A': 1, 'B': 2, 'C': 3, 'D': 4, 'E': '5', 'F': 6, 'G': 7, 'H': '8', 'I': 9,
+                                           'J': 10}
+    row = request.data.get('row')
+    park_id = request.data.get('park_id')
+    row = row_and_column_mapping_with_letters.get(row)
+    park = ParkingArea.objects.get(id=park_id)
+    slot_list = park.slots.all()
+    slot_list_in_row_being_asked = []
+    for slot_obj in slot_list:
+        if slot_obj.row == row:
+            slot_list_in_row_being_asked.append(slot_obj)
+    data = {}
+    count = 0
+    for slots in slot_list_in_row_being_asked:
+        count = count + 1
+        if slots.parked_car is not None:
+            serializer = VehicleSerializer(slots.parked_car)
+            data[count] = serializer.data
+    return Response(status=HTTP_200_OK, data=data)
