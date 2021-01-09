@@ -16,11 +16,19 @@ logger = logging.getLogger('django')
 
 
 def home(request):
+    """
+    basic home  view
+    :rtype: html tag
+    """
     return HttpResponse('<div class="container"><h1>Home</h1></div>')
 
 
 class OwnerApi(APIView):
     def get(self, request):
+        """
+        :param request: contains id either null or some integer
+        :return: Owner object mapped to the id given
+        """
         id = request.data.get('id')
         if id is not None:
             owner_object = Owner.objects.get(id=id)
@@ -33,15 +41,25 @@ class OwnerApi(APIView):
         return Response(status=HTTP_200_OK, data=serializer.data)
 
     def post(self, request):
+        """
+        objective:creates an Owner object in the database
+        :param request: contains Owner object data
+        :return: status code
+        """
         serializer = OwnerSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             logger.debug('owner object created with the data provided')
-            return Response({'msg': 'Data created'})
+            return Response(status=HTTP_200_OK, data={'msg': 'Data created'})
         logger.debug(serializer.errors)
         return Response(status=HTTP_200_OK, data=serializer.errors)
 
     def put(self, request):
+        """
+        objective:updates Owner object having id given in request
+        :param request: contains owner data and id
+        :return: status code
+        """
         id = request.data.get('id')
         owner_object = Owner.objects.get(id=id)
         serializer = OwnerSerializer(owner_object, data=request.data, partial=True)
@@ -53,6 +71,11 @@ class OwnerApi(APIView):
         return Response(serializer.errors)
 
     def patch(self, request):
+        """
+        objective:updates Owner object having id given in request
+        :param request: contains owner data and id
+        :return: status code
+        """
         id = request.data.get('id')
         owner_object = Owner.objects.get(id=id)
         serializer = OwnerSerializer(owner_object, data=request.data, partial=True)
@@ -64,6 +87,11 @@ class OwnerApi(APIView):
         return Response(serializer.errors)
 
     def delete(self, request):
+        """
+        objective:deletes Owner object having the given id in request
+        :param request: contains id
+        :return: status code
+        """
         id = request.data.get('id')
         owner_object = Owner.objects.get(id=id)
         owner_object.delete()
@@ -73,6 +101,10 @@ class OwnerApi(APIView):
 
 class ParkingApi(APIView):
     def get(self, request):
+        """
+        :param request: contains id of a Parking Lot object
+        :return:  returns the object having id given in request
+        """
         id = request.data.get('id')
         if id is not None:
             object1 = ParkingArea.objects.get(id=id)
@@ -85,6 +117,11 @@ class ParkingApi(APIView):
         return Response(serializer.data)
 
     def post(self, request):
+        """
+        objective: used to create a new Object
+        :param request: contains key and values of the object
+        :return: status code
+        """
         serializer = ParkingLotSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -105,6 +142,11 @@ class ParkingApi(APIView):
         return Response({'msg': serializer.errors})
 
     def put(self, request):
+        """
+        objective:updates the  object having id given in request
+        :param request: contains object data and id
+        :return: status code
+        """
         id = request.data.get('id')
         object1 = ParkingArea.objects.get(id=id)
         serializer = ParkingLotSerializer(object1, data=request.data, partial=True)
@@ -116,6 +158,11 @@ class ParkingApi(APIView):
         return Response(serializer.errors)
 
     def patch(self, request):
+        """
+        objective:updates the  object having id given in request
+        :param request: contains object data and id
+        :return: status code
+        """
         id = request.data.get('id')
         object1 = ParkingArea.objects.get(id=id)
         serializer = ParkingLotSerializer(object1, data=request.data, partial=True)
@@ -127,6 +174,11 @@ class ParkingApi(APIView):
         return Response(serializer.errors)
 
     def delete(self, request):
+        """
+        objective:deletes Park object having the given id in request
+        :param request: contains id
+        :return: status code
+        """
         id = request.data.get('id')
         object1 = ParkingArea.objects.get(id=id)
         object1.delete()
@@ -148,6 +200,11 @@ class VehicleApi(APIView):
         return Response(serializer.data)
 
     def post(self, request):
+        """
+        objective: used to create a new Object
+        :param request: contains key and values of the object
+        :return: status code
+        """
         serializer = VehicleSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -157,6 +214,11 @@ class VehicleApi(APIView):
         return Response({'msg': serializer.errors})
 
     def put(self, request):
+        """
+        objective:updates the  object having id given in request
+        :param request: contains object data and id
+        :return: status code
+        """
         id = request.data.get('id')
         object1 = Car.objects.get(id=id)
         serializer = VehicleSerializer(object1, data=request.data, partial=True)
@@ -168,6 +230,11 @@ class VehicleApi(APIView):
         return Response(serializer.errors)
 
     def patch(self, request):
+        """
+        objective:updates the  object having id given in request
+        :param request: contains object data and id
+        :return: status code
+        """
         id = request.data.get('id')
         object1 = Car.objects.get(id=id)
         serializer = VehicleSerializer(object1, data=request.data, partial=True)
@@ -179,6 +246,11 @@ class VehicleApi(APIView):
         return Response(serializer.errors)
 
     def delete(self, request):
+        """
+        objective:deletes Vehicle object having the given id in request
+        :param request: contains id
+        :return: status code
+        """
         id = request.data.get('id')
         object1 = Car.objects.get(id=id)
         object1.delete()
@@ -200,6 +272,11 @@ class SlotApi(APIView):
         return Response(serializer.data)
 
     def post(self, request):
+        """
+        objective: used to create a new Object
+        :param request: contains key and values of the object
+        :return: status code
+        """
         serializer = SlotSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -209,6 +286,11 @@ class SlotApi(APIView):
         return Response({'msg': serializer.errors})
 
     def put(self, request):
+        """
+        objective:updates the  object having id given in request
+        :param request: contains object data and id
+        :return: status code
+        """
         id = request.data.get('id')
         object1 = Slot.objects.get(id=id)
         serializer = SlotSerializer(object1, data=request.data, partial=True)
@@ -220,6 +302,11 @@ class SlotApi(APIView):
         return Response(serializer.errors)
 
     def patch(self, request):
+        """
+        objective:updates the  object having id given in request
+        :param request: contains object data and id
+        :return: status code
+        """
         id = request.data.get('id')
         object1 = Slot.objects.get(id=id)
         serializer = SlotSerializer(object1, data=request.data, partial=True)
@@ -231,6 +318,11 @@ class SlotApi(APIView):
         return Response(serializer.errors)
 
     def delete(self, request):
+        """
+        objective:deletes Slot object having the given id in request
+        :param request: contains id
+        :return: status code
+        """
         id = request.data.get('id')
         object1 = Slot.objects.get(id=id)
         object1.delete()
@@ -252,6 +344,11 @@ class PoliceOrSecurityApi(APIView):
         return Response(serializer.data)
 
     def post(self, request):
+        """
+        objective: used to create a new Object
+        :param request: contains key and values of the object
+        :return: status code
+        """
         serializer = PoliceOrSecuritySerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -261,6 +358,11 @@ class PoliceOrSecurityApi(APIView):
         return Response({'msg': serializer.errors})
 
     def put(self, request):
+        """
+        objective:updates the  object having id given in request
+        :param request: contains object data and id
+        :return: status code
+        """
         id = request.data.get('id')
         object1 = PoliceOrSecurity.objects.get(id=id)
         serializer = PoliceOrSecuritySerializer(object1, data=request.data, partial=True)
@@ -272,6 +374,11 @@ class PoliceOrSecurityApi(APIView):
         return Response(serializer.errors)
 
     def patch(self, request):
+        """
+        objective:updates the  object having id given in request
+        :param request: contains object data and id
+        :return: status code
+        """
         id = request.data.get('id')
         object1 = PoliceOrSecurity.objects.get(id=id)
         serializer = PoliceOrSecuritySerializer(object1, data=request.data, partial=True)
@@ -283,6 +390,11 @@ class PoliceOrSecurityApi(APIView):
         return Response(serializer.errors)
 
     def delete(self, request):
+        """
+        objective:deletes PoliceOrSecurity object having the given id in request
+        :param request: contains id
+        :return: status code
+        """
         id = request.data.get('id')
         object1 = PoliceOrSecurity.objects.get(id=id)
         object1.delete()
@@ -304,6 +416,11 @@ class ValetApi(APIView):
         return Response(status=HTTP_200_OK, data=serializer.data)
 
     def post(self, request):
+        """
+        objective: used to create a new Object
+        :param request: contains key and values of the object
+        :return: status code
+        """
         serializer = ValetSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -313,6 +430,11 @@ class ValetApi(APIView):
         return Response({'msg': serializer.errors})
 
     def put(self, request):
+        """
+        objective:updates the  object having id given in request
+        :param request: contains object data and id
+        :return: status code
+        """
         id = request.data.get('id')
         object1 = Valet.objects.get(id=id)
         serializer = ValetSerializer(object1, data=request.data, partial=True)
@@ -324,6 +446,11 @@ class ValetApi(APIView):
         return Response(serializer.errors)
 
     def patch(self, request):
+        """
+        objective:updates the  object having id given in request
+        :param request: contains object data and id
+        :return: status code
+        """
         id = request.data.get('id')
         object1 = Valet.objects.get(id=id)
         serializer = ValetSerializer(object1, data=request.data, partial=True)
@@ -335,6 +462,11 @@ class ValetApi(APIView):
         return Response(serializer.errors)
 
     def delete(self, request):
+        """
+        objective:deletes Valet object having the given id in request
+        :param request: contains id
+        :return: status code
+        """
         id = request.data.get('id')
         object1 = Valet.objects.get(id=id)
         object1.delete()
@@ -356,6 +488,11 @@ class DriverApi(APIView):
         return Response(serializer.data)
 
     def post(self, request):
+        """
+        objective: used to create a new Object
+        :param request: contains key and values of the object
+        :return: status code
+        """
         serializer = DriverSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -365,6 +502,11 @@ class DriverApi(APIView):
         return Response({'msg': serializer.errors})
 
     def put(self, request):
+        """
+        objective:updates the  object having id given in request
+        :param request: contains object data and id
+        :return: status code
+        """
         id = request.data.get('id')
         object1 = Driver.objects.get(id=id)
         serializer = DriverSerializer(object1, data=request.data, partial=True)
@@ -376,6 +518,11 @@ class DriverApi(APIView):
         return Response(serializer.errors)
 
     def patch(self, request):
+        """
+        objective:updates the  object having id given in request
+        :param request: contains object data and id
+        :return: status code
+        """
         id = request.data.get('id')
         object1 = Driver.objects.get(id=id)
         serializer = DriverSerializer(object1, data=request.data, partial=True)
@@ -387,6 +534,11 @@ class DriverApi(APIView):
         return Response(serializer.errors)
 
     def delete(self, request):
+        """
+        objective:deletes Driver object having the given id in request
+        :param request: contains id
+        :return: status code
+        """
         id = request.data.get('id')
         object1 = Driver.objects.get(id=id)
         object1.delete()
@@ -397,6 +549,11 @@ class DriverApi(APIView):
 @api_view(['GET'])
 @csrf_exempt
 def find_my_car_api(request):
+    """
+    objective: to find where the car is parked
+    :param request: contains car id
+    :return: park and slot id
+    """
     car_id = request.data.get('car_id')
     car_object = Car.objects.get(id=car_id)
     return Response(status=HTTP_200_OK, data={'park': car_object.park_id, 'slot': car_object.slot_id})
@@ -405,6 +562,11 @@ def find_my_car_api(request):
 @api_view(['GET'])
 @csrf_exempt
 def car_entry_time_and_charges(request):
+    """
+    objective: to get charge till now
+    :param request: contains car_id
+    :return: bill amount and entry time
+    """
     rate_per_minute = 1
     car_id = request.data.get('car_id')
     car_object = Car.objects.get(id=car_id)
@@ -416,6 +578,11 @@ def car_entry_time_and_charges(request):
 
 
 def select_park(driver_id=None):
+    """
+    objective: select a park to park the vehicle
+    :param driver_id:
+    :return: park id
+    """
     parking_lot_object = None
     if driver_id is not None:
         driver_object = Driver.objects.get(id=driver_id)
@@ -432,6 +599,12 @@ def select_park(driver_id=None):
 
 
 def select_slot(driver_id=None, park_id=None):
+    """
+     objective: to select a slot to park the car
+    :param driver_id:
+    :param park_id:
+    :return: returns slot id
+    """
     parking_lot_object = ParkingArea.objects.get(id=park_id)
     driver_object = Driver.objects.get(id=driver_id)
     slots = None
@@ -458,6 +631,10 @@ def select_slot(driver_id=None, park_id=None):
 
 
 def select_parking_attendant():
+    """
+    objective : to select a parking attendant for  parking  a vehicle
+    :return: parking attendant object
+    """
     parking_attendant = None
     for obj in Valet.objects.all():
         if not obj.is_Currently_Parking:
@@ -469,6 +646,11 @@ def select_parking_attendant():
 @csrf_exempt
 @api_view(['POST'])
 def park_my_car(request):
+    """
+    objective: to park the car
+    :param request: car_id and druver id
+    :return: car object showing car is parked and status code
+    """
     driver_object = Driver.objects.get(id=request.data.get('driver_id'))
     parking_lot_id = select_park(request.data.get('driver_id'))
     parking_lot_object = ParkingArea.objects.get(id=parking_lot_id)
@@ -508,6 +690,11 @@ def park_my_car(request):
 @api_view(['POST'])
 @csrf_exempt
 def unpark_my_car(request):
+    """
+    objective: to un park the car
+    :param request: contains car_id
+    :return: car onject showing null values in the fields denoting parking status and park id and slot id
+    """
     car_id = request.data['car_id']
     if car_id is not None:
         car_object = Car.objects.get(id=car_id)
@@ -546,6 +733,11 @@ def unpark_my_car(request):
 @api_view(['GET'])
 @csrf_exempt
 def get_vehicle_location_info(request):
+    """
+    objective: gives location of vehicle which has  park_id and slot_id
+    :param request: contains colour of car
+    :return: location info
+    """
     colour = request.data.get('colour_of_car')
     data = {}
     for vehicle in Car.objects.filter(colour=colour):
@@ -556,6 +748,11 @@ def get_vehicle_location_info(request):
 @api_view(['GET'])
 @csrf_exempt
 def get_location_number_parking_attendant_info(request):
+    """
+    objective: used to get location and parking attendant info and number of vehicle
+    :param request: contains vehicle company name and colour of vehicle
+    :return:location number of vehicle and parking attendant info
+    """
     vehicle_company = request.data.get('vehicle_company')
     colour = request.data.get('colour')
     data = {}
@@ -571,6 +768,11 @@ def get_location_number_parking_attendant_info(request):
 @api_view(['GET'])
 @csrf_exempt
 def get_vehicle_details(request):
+    """
+    objective:police men call this api to get vehicle info of a cerating company
+    :param request: contains vehicle compapny name
+    :return: vehicle object
+    """
     vehicle_company = request.data.get('vehicle_company')
     data = {}
     count = 0
@@ -584,6 +786,11 @@ def get_vehicle_details(request):
 @api_view(['GET'])
 @csrf_exempt
 def get_vehicle_info_parked_before_time_given(request):
+    """
+    objective: called to return vehicle info of vehicles parked before time given
+    :param request: contains time in minutes
+    :return: car object
+    """
     time_ago = request.data.get('time_ago')
     time_ago = timezone.now() - timezone.timedelta(minutes=time_ago)
     data = Car.objects.filter(entry_time__gt=time_ago)
@@ -594,6 +801,11 @@ def get_vehicle_info_parked_before_time_given(request):
 @api_view(['GET'])
 @csrf_exempt
 def get_info_of_all_vehicles_parked_in_the_lot(request):
+    """
+    objective: is called to return all the car objects parked in the lot
+    :param request: contains id of the lot
+    :return: vehicle objects
+    """
     park_id = request.data.get('park_id')
     data = Car.objects.filter(park_id=park_id)
     serializer = VehicleSerializer(data, many=True)
@@ -603,6 +815,11 @@ def get_info_of_all_vehicles_parked_in_the_lot(request):
 @api_view(['GET'])
 @csrf_exempt
 def get_location_and_info_of_vehicles_in_row(request):
+    """
+    objective: returns all the objects parked in the same given row in a given park
+    :param request: contains the row and park_id value
+    :return: vehicle objects
+    """
     row_and_column_mapping_with_letters = {'A': 1, 'B': 2, 'C': 3, 'D': 4, 'E': 5, 'F': 6, 'G': 7, 'H': 8, 'I': 9,
                                            'J': 10}
     row = request.data.get('row')
