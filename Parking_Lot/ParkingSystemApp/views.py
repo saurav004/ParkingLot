@@ -94,13 +94,13 @@ class ParkingApi(APIView):
             for i in range(1, 11):
                 for j in range(1, 11):
                     count = count + 1
-                    slot = Slot.objects.create(slot_number=count, row=i, column=j)
+                    slot = Slot.objects.create(slot_number=count, row=i, column=j, status="VACANT")
+                    parking_object.slots.add(slot)
                     slot.save()
             parking_object.status = "VACANT"
-            parking_object.slots.add(slot)
             parking_object.save()
             logger.debug('Park object created with data given')
-            return Response({'msg': 'Data created'})
+            return Response(status=HTTP_200_OK, data={'msg': 'Data created'})
         logger.debug(serializer.errors)
         return Response({'msg': serializer.errors})
 
@@ -404,25 +404,73 @@ def find_my_car_api(request):
 
 @api_view(['GET'])
 @csrf_exempt
-def car_entry_time(request):
+def car_entry_time_and_charges(request):
+    rate_per_minute = 1
     car_id = request.data.get('car_id')
     car_object = Car.objects.get(id=car_id)
-    return Response(status=HTTP_200_OK, data={'car_entry_time': car_object.entry_time})
+    time = int((timezone.now() - car_object.entry_time).total_seconds() / 60)
+    total_amount_to_be_charged = time * rate_per_minute
+    return Response(status=HTTP_200_OK,
+                    data={'car_entry_time': car_object.entry_time, 'bill_amount': total_amount_to_be_charged,
+                          'currency': 'INR'})
+
+
+def select_park(driver_id=None):
+    parking_lot_object = None
+    if driver_id is not None:
+        driver_object = Driver.objects.get(id=driver_id)
+        parking_lot_object = ParkingArea.objects.first()
+        if driver_object.is_handicapped:
+            parking_objects_list = ParkingArea.objects.all().order_by('id')
+        else:
+            parking_objects_list = ParkingArea.objects.all()
+        for park in parking_objects_list:
+            if parking_lot_object.filled_parking_slots > park.filled_parking_slots:
+                parking_lot_object = park
+    parking_lot_id = parking_lot_object.id
+    return parking_lot_id
+
+
+def select_slot(driver_id=None, park_id=None):
+    parking_lot_object = ParkingArea.objects.get(id=park_id)
+    driver_object = Driver.objects.get(id=driver_id)
+    slots = None
+    if driver_object.is_handicapped:
+        slot_obj_list = parking_lot_object.slots.all().order_by('-id')
+        should_break = False
+        for i in range(1, 11):
+            for j in range(1, 11):
+                for slot_obj in slot_obj_list:
+                    if slot_obj.row == i and slot_obj.column == j:
+                        if slot_obj.status == "VACANT" or slot_obj.status is None:
+                            slots = slot_obj
+                            should_break = True
+                if should_break:
+                    break
+            if should_break:
+                break
+    else:
+        slot_obj_list = parking_lot_object.slots.all()
+        for slot_obj in slot_obj_list:
+            if slot_obj.status == "VACANT" or slot_obj.status is None:
+                slots = slot_obj
+    return slots.id
+
+
+def select_parking_attendant():
+    parking_attendant = None
+    for obj in Valet.objects.all():
+        if not obj.is_Currently_Parking:
+            parking_attendant = obj
+            return parking_attendant
+    return parking_attendant
 
 
 @csrf_exempt
 @api_view(['POST'])
 def park_my_car(request):
     driver_object = Driver.objects.get(id=request.data.get('driver_id'))
-    parking_lot_object = ParkingArea.objects.first()
-    if driver_object.is_handicapped:
-        parking_objects_list = ParkingArea.objects.all().order_by('id')
-    else:
-        parking_objects_list = ParkingArea.objects.all()
-    for park in parking_objects_list:
-        if parking_lot_object.filled_parking_slots > park.filled_parking_slots:
-            parking_lot_object = park
-    parking_lot_id = parking_lot_object.id
+    parking_lot_id = select_park(request.data.get('driver_id'))
     parking_lot_object = ParkingArea.objects.get(id=parking_lot_id)
     if parking_lot_object.filled_parking_slots < 100:
         parking_lot_object.filled_parking_slots = parking_lot_object.filled_parking_slots + 1
@@ -431,35 +479,11 @@ def park_my_car(request):
             notify_owner_car_is_parked.delay(parking_lot_object.id)
             notify_airport_security_car_is_parked.delay(parking_lot_object.id)
         parking_lot_object.save()
-        slots = None
-        if driver_object.is_handicapped:
-            slot_obj_list = parking_lot_object.slots.all().order_by('-id')
-            should_break = False
-            for i in range(1, 11):
-                for j in range(1, 11):
-                    for slot_obj in slot_obj_list:
-                        if slot_obj.row == i and slot_obj.column == j:
-                            if slot_obj.status == "VACANT" or slot_obj.status is None:
-                                slots = slot_obj
-                                should_break = True
-                    if should_break:
-                        break
-                if should_break:
-                    break
-        else:
-            slot_obj_list = parking_lot_object.slots.all()
-            for slot_obj in slot_obj_list:
-                if slot_obj.status == "VACANT" or slot_obj.status is None:
-                    slots = slot_obj
+        slot_id = select_slot(driver_object.id, parking_lot_id)
+        slots = Slot.objects.get(id=slot_id)
         if slots is None:
             return Response(status=HTTP_500_INTERNAL_SERVER_ERROR, data={'msg': 'no slot is VACANT'})
-        else:
-            slot_id = slots.id
-        parking_attendant = None
-        for obj in Valet.objects.all():
-            if not obj.is_Currently_Parking:
-                parking_attendant = obj
-                break
+        parking_attendant = select_parking_attendant()
         if parking_attendant is None:
             return Response(status=HTTP_500_INTERNAL_SERVER_ERROR, data={'msg': 'no valet is free now'})
         car_id = request.data.get('car_id')
@@ -487,7 +511,7 @@ def unpark_my_car(request):
     car_id = request.data['car_id']
     if car_id is not None:
         car_object = Car.objects.get(id=car_id)
-        if car_object:
+        if car_object and car_object.is_parked:
             slot_id = car_object.slot_id
             slot_object = Slot.objects.get(id=slot_id)
             slot_object.parked_car = None
@@ -514,7 +538,7 @@ def unpark_my_car(request):
             serializer = VehicleSerializer(car_object)
             return Response(status=HTTP_200_OK, data=serializer.data)
         else:
-            return Response(status=HTTP_400_BAD_REQUEST, data={"msg": 'Car not Found'})
+            return Response(status=HTTP_400_BAD_REQUEST, data={"msg": 'Car not Found or car is not parked'})
     else:
         return Response(status=HTTP_400_BAD_REQUEST, data={"msg": "car id provided is null"})
 

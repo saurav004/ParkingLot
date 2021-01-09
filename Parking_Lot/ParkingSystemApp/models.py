@@ -45,7 +45,7 @@ class ParkingArea(models.Model):
     )
     unique_park_id = models.IntegerField(unique=True, validators=[MinValueValidator(1)])
     status = models.CharField(max_length=30, default="VACANT", choices=STATUS_OPTIONS, )
-    filled_parking_slots = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(100)], default=1,
+    filled_parking_slots = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(100)], default=0,
                                                blank=True)
     property_Owner = models.CharField(max_length=30, default="admin")
     slots = models.ManyToManyField(Slot, blank=True, default="VACANT")
@@ -82,7 +82,7 @@ class Valet(models.Model):
     is_Currently_Parking = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"{self.valet_name} - status {self.is_Currently_Parking}"
+        return f"{self.valet_name} - status {self.is_Currently_Parking}  | id: {self.id}"
 
 
 class Driver(models.Model):
@@ -91,4 +91,4 @@ class Driver(models.Model):
     is_handicapped = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"{self.Driver_name} - status {self.vehicle} id: {self.id}"
+        return f"{self.Driver_name} | -  vehicle: [ {self.vehicle} ] | handicapped?: {self.is_handicapped} | id: {self.id}"
